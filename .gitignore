@@ -1,1 +1,25 @@
 Medical_Qwen_Final/
+*.gguf
+# Python bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Large Models and Weights
+models/
+*.gguf
+deployment/model/
+
+*.jsonl
+
+# Data and Results
+smoke_test_results/
+data/*.csv
+
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Notebook Checkpoints
+.ipynb_checkpoints/
