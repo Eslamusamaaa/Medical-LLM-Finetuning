@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Shifa — Arabic Medical AI Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body class="dark">
+
+  <div class="ambient">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">☤</div>
+      <div class="logo-text">
+        <span class="logo-name">Shifa</span>
+        <span class="logo-sub">Arabic Medical AI</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <p class="section-label">Suggested Questions</p>
+      <div class="suggestions">
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">ما هي أعراض مرض السكري؟</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">كيف أتعامل مع ارتفاع ضغط الدم؟</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">ما الفرق بين الإنفلونزا ونزلة البرد؟</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">ما هي فوائد حمض الفوليك؟</button>
+        <button class="suggestion-btn" onclick="sendSuggestion(this)">ما أسباب آلام الظهر المزمنة؟</button>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="status-pill">
+        <span class="status-dot"></span>
+        100% Offline
+      </div>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Chat -->
+  <main class="chat-main">
+
+    <header class="chat-header">
+      <div class="header-info">
+        <div class="header-avatar">☤</div>
+        <div>
+          <h1 class="header-title">Shifa</h1>
+          <p class="header-sub">Powered by Qwen-2.5 · Fine-tuned on Arabic Medical Data</p>
+        </div>
+      </div>
+      <button class="clear-btn" onclick="clearChat()">Clear Chat</button>
+    </header>
+
+    <div class="messages" id="messages">
+      <div class="welcome-msg">
+        <div class="welcome-icon">🩺</div>
+        <h2>Welcome to Shifa</h2>
+        <p>Ask me any medical question in Arabic and I'll answer with accuracy and professionalism.<br>
+        Remember: This assistant is for information only — always consult a doctor.</p>
+      </div>
+    </div>
+
+    <div class="disclaimer">
+      ⚠️ For educational purposes only · Always consult a qualified physician for diagnosis and treatment
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea
+          id="user-input"
+          placeholder="Type your medical question in Arabic..."
+          rows="1"
+          onkeydown="handleKey(event)"
+          oninput="autoResize(this)"
+          dir="auto"
+        ></textarea>
+        <button id="send-btn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Press Enter to send · Shift+Enter for new line</p>
+    </div>
+  </main>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
