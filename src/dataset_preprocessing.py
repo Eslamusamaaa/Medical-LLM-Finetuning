@@ -104,4 +104,4 @@ if __name__ == "__main__":
     
     
     final_data = preprocessor.process_dataset("madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI")
-    preprocessor.save_to_jsonl(final_data, "qwen_ready_medical_qa.jsonl")
+    preprocessor.save_to_jsonl(final_data, "qwen_ready_medical_qa(2).jsonl")
