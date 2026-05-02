@@ -1,20 +1,22 @@
 # Medical LLM Finetuning
 
 ## 1. Project Overview
-This repository contains the source code, deployment configuration, and documentation for the Arabic Medical Question Answering Large Language Model (LLM). The project leverages a fine-tuned Qwen2.5-7B architecture, specifically optimized to provide accurate, cautious, and generalized medical information in the Arabic language. 
+This repository contains the source code, deployment configuration, and documentation for the Arabic Medical Question Answering Large Language Model (LLM). The project leverages a fine-tuned Qwen2.5-1.5B architecture, specifically optimized to provide accurate, cautious, and generalized medical information in the Arabic language. 
 
-The model weights and configuration are hosted on Hugging Face and can be accessed via the official repository: [hagora-30/q7b_finetuined](https://huggingface.co/hagora-30/q7b_finetuined).
+The model weights and configuration are hosted on Hugging Face and can be accessed via the official repository: [hagora-30/qwen2.5-1.5B-medical-arabic](https://huggingface.co/hagora-30/qwen2.5-1.5B-medical-arabic).
 
 The system is designed strictly for educational and informational purposes, ensuring safety by avoiding direct medical diagnoses or pharmaceutical prescriptions. The model was fine-tuned using the Unsloth library on a curated Arabic medical dataset to ensure high-quality clinical reasoning in a conversational context.
 
 ## 2. Architecture and Technology Stack
-* **Base Model:** Qwen2.5-7B
-* **Model Repository:** [hagora-30/q7b_finetuined](https://huggingface.co/hagora-30/q7b_finetuined)
-* **Fine-Tuning Framework:** Unsloth (LoRA/QLoRA)
-* **Inference Engine:** llama.cpp (via llama-cpp-python)
+* **Base Model:** Qwen2.5-1.5B
+* **Model Repository:** [hagora-30/qwen2.5-1.5B-medical-arabic](https://huggingface.co/hagora-30/qwen2.5-1.5B-medical-arabic)
+Fine-Tuning Framework: PyTorch & Hugging Face Ecosystem (Transformers, PEFT, TRL) via Lightning AI Studios
+
+* **Inference Engine:** Hugging Face Transformers (AutoModelForCausalLM via PyTorch)
+
 * **Backend Framework:** FastAPI (Python)
-* **Quantization:** GGUF (Q4_K_M) for optimized local performance
-* **Hardware Acceleration:** CUDA (Nvidia GPU support) / CPU fallback
+
+* **Hardware Acceleration:** CUDA (Nvidia GPU support via PyTorch device_map="auto")
 
 ## 3. Dataset and Preprocessing
 The model was trained on a comprehensive, cleaned Arabic medical dataset (madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI). Extensive Exploratory Data Analysis (EDA) and data preprocessing pipelines were implemented to ensure data quality. The preprocessing phase included identifying and handling missing values, normalizing Arabic text formatting, and analyzing instruction-output length distributions to optimize tokenization limits.
