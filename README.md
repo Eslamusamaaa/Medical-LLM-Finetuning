@@ -56,7 +56,7 @@ pip install llama-cpp-python --extra-index-url [https://abetlen.github.io/llama-
 Ensure your project directory adheres to the following structure:
 ```text
 /model
-    7b_medical_model.gguf (Downloaded from hagora-30/q7b_finetuined)
+    hagora-30/qwen2.5-1.5B-medical-arabic.
 /BackEnd
     app.py
 /FrontEnd
