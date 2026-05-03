@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+pydantic
+torch
+transformers
+datasets
+peft
+trl
+tqdm
+pandas
+numpy
+matplotlib
+seaborn
+wordcloud
+arabic-reshaper
+python-bidi
