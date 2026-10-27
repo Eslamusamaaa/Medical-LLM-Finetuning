@@ -2,8 +2,8 @@ import torch
 import sys
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-MODEL_PATH  = r"C:\Users\Lenovo\Medical-LLM-Finetuning\deployment\models\7b_medical_model.gguf"
-OUTPUT_FILE = r"C:\Users\Lenovo\Medical-LLM-Finetuning\reports\test_output.txt"
+MODEL_PATH  = "hagora-30/qwen2.5-1.5B-medical-arabic"  # Hub id or a local Transformers folder (not a .gguf file)
+OUTPUT_FILE = "reports/test_output.txt"
 
 SYSTEM_PROMPT = """أنت مساعد طبي ذكي وموثوق باللغة العربية. دورك الأساسي هو تقديم معلومات طبية عامة، وتثقيف صحي بأسلوب علمي، دقيق، ومبسط.
 يجب أن تكون إجابتك مفصلة، ومنسقة في نقاط مرتبة (Bullet points) لتسهيل القراءة.

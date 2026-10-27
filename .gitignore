@@ -10,7 +10,6 @@ models/
 *.gguf
 deployment/model/
 
-*.jsonl
 
 # Data and Results
 smoke_test_results/

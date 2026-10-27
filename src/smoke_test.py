@@ -6,8 +6,8 @@ from trl import SFTTrainer
 
 print("Starting Local Smoke Test...")
 
-data_path = "data/chatml_dataset.csv" 
-dataset = load_dataset("csv", data_files=data_path, split="train[:10]") 
+data_path = "data/qwen_ready_medical_qa.jsonl"
+dataset = load_dataset("json", data_files=data_path, split="train[:10]")
 print("Dataset loaded successfully.")
 
 model_id = "Qwen/Qwen2.5-0.5B"

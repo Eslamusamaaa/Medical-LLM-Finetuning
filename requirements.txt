@@ -1,13 +1,20 @@
-fastapi
-uvicorn
-pydantic
-llama-cpp-python
-torch
-transformers
+# --- API (app/main.py) ---
+fastapi>=0.111
+uvicorn[standard]>=0.29
+pydantic>=2.0
+torch>=2.2
+transformers>=4.40
+accelerate>=0.29
+sentencepiece>=0.2
+# RAG (default mode; set USE_RAG=0 to skip)
+langchain-community
+langchain-core
+faiss-cpu
+sentence-transformers
+# --- training and analysis (src/, experiments/) ---
 datasets
 peft
 trl
-tqdm
 pandas
 numpy
 matplotlib
@@ -15,3 +22,4 @@ seaborn
 wordcloud
 arabic-reshaper
 python-bidi
+tqdm

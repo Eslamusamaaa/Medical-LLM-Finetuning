@@ -1,100 +1,109 @@
-# Medical LLM Finetuning
+# Medical LLM Finetuning: Arabic Medical Assistant ("Shifa")
 
-## 1. Project Overview
-This repository contains the source code, deployment configuration, and documentation for the Arabic Medical Question Answering Large Language Model (LLM). The project leverages a fine-tuned Qwen2.5-1.5B architecture, specifically optimized to provide accurate, cautious, and generalized medical information in the Arabic language. 
+An Arabic medical question-answering assistant built on **Qwen2.5-1.5B**, fine-tuned with LoRA on a curated Arabic medical
+QA dataset and served with **FastAPI**, with an optional **RAG** layer (FAISS retrieval over the training QA pairs).
+It gives general, cautious health information and is designed to avoid diagnoses and drug doses.
 
-The model weights and configuration are hosted on Hugging Face and can be accessed via the official repository: [hagora-30/qwen2.5-1.5B-medical-arabic](https://huggingface.co/hagora-30/qwen2.5-1.5B-medical-arabic).
+Model on the Hub: [hagora-30/qwen2.5-1.5B-medical-arabic](https://huggingface.co/hagora-30/qwen2.5-1.5B-medical-arabic)
 
-The system is designed strictly for educational and informational purposes, ensuring safety by avoiding direct medical diagnoses or pharmaceutical prescriptions. The model was fine-tuned using the Unsloth library on a curated Arabic medical dataset to ensure high-quality clinical reasoning in a conversational context.
+![Chat interface](img/Medical-LLM-Finetuning/chat_ui.png)
 
-## 2. Architecture and Technology Stack
-* **Base Model:** Qwen2.5-1.5B
-* **Model Repository:** [hagora-30/qwen2.5-1.5B-medical-arabic](https://huggingface.co/hagora-30/qwen2.5-1.5B-medical-arabic)
-Fine-Tuning Framework: PyTorch & Hugging Face Ecosystem (Transformers, PEFT, TRL) via Lightning AI Studios
+*The chat interface (suggested questions, Arabic input, safety banner, dark/light theme). The screenshot shows the
+interface only; running the full app downloads the model and needs the dependencies below.*
 
-* **Inference Engine:** Hugging Face Transformers (AutoModelForCausalLM via PyTorch)
+### Example conversation
 
-* **Backend Framework:** FastAPI (Python)
+![Example conversation (illustrative mock)](img/Medical-LLM-Finetuning/chat_example_mock.png)
 
-* **Hardware Acceleration:** CUDA (Nvidia GPU support via PyTorch device_map="auto")
+*Illustrative mock: the layout of a conversation with a hand-written answer, not the output of the model.*
 
-## 3. Dataset and Preprocessing
-The model was trained on a comprehensive, cleaned Arabic medical dataset (madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI). Extensive Exploratory Data Analysis (EDA) and data preprocessing pipelines were implemented to ensure data quality. The preprocessing phase included identifying and handling missing values, normalizing Arabic text formatting, and analyzing instruction-output length distributions to optimize tokenization limits.
+## Architecture
 
-## 4. System Requirements
-To deploy and run the application locally, the following prerequisites must be met:
-* Operating System: Windows 10/11, Linux, or macOS.
-* Python: Version 3.11 (Recommended for compatibility).
-* Memory (RAM): Minimum 16 GB.
-* GPU (Optional): Nvidia GPU with CUDA 12.x support for accelerated inference.
+```
+question ─► (RAG) FAISS search: 2 most similar QA pairs ─► prompt = system + reference info + question
+         ─► fine-tuned Qwen2.5-1.5B ─► Arabic answer ─► chat UI
+```
 
-## 5. Installation and Setup Instructions
+| Component | Choice |
+|---|---|
+| Base model | Qwen2.5-1.5B-Instruct, LoRA (r=128, alpha=256) on all attention and MLP projections |
+| Training | PyTorch, Transformers, PEFT, TRL (`src/finetune.py`), BF16, 5 epochs, effective batch 32, cosine schedule |
+| Retrieval | FAISS index over the QA pairs, embeddings `paraphrase-multilingual-MiniLM-L12-v2` |
+| Backend | FastAPI (`app/main.py`), `USE_RAG=0` switches retrieval off |
+| Frontend | Plain HTML/CSS/JS in `app/static/` |
 
-### 5.1. Environment Setup
-It is highly recommended to isolate the project dependencies using a virtual environment.
+## Project structure
+
+```
+├── app/
+│   ├── main.py                    # FastAPI server (RAG on/off)
+│   └── static/                    # index.html, script.js, style.css
+├── src/
+│   ├── dataset_preprocessing.py   # filter + clean the public dataset -> data/*.jsonl
+│   ├── eda.py                     # exploratory analysis (figures in reports/)
+│   ├── finetune.py                # LoRA fine-tuning of Qwen2.5-1.5B
+│   ├── build_vector_db.py         # build rag_index/ from the QA pairs
+│   ├── compare_base_vs_finetuned.py
+│   ├── smoke_test.py              # 3-step training run to check the setup
+│   └── test_model.py              # sample questions -> reports/test_output.txt
+├── experiments/                   # 0.5B and 7B (Unsloth) fine-tuning runs
+├── data/                          # qwen_ready_medical_qa.jsonl, sample_preview.json
+├── rag_index/                     # index.faiss, index.pkl
+├── reports/                       # EDA figures and sample outputs
+└── requirements.txt
+```
+
+## Dataset
+
+[madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI](https://huggingface.co/datasets/madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI)
+cleaned by `src/dataset_preprocessing.py`: URLs, e-mails and signatures removed, whitespace normalized, short pairs dropped,
+questions that ask for a personal diagnosis filtered out (only general questions are kept), duplicates removed.
+Drive links for the original and cleaned data are in `Dataset_DriveLink.txt`.
+
+![Length distributions](reports/length_distributions.png)
+
+## Setup and run
+
 ```bash
-conda create -n medical_env python=3.11 -y
-conda activate medical_env
+conda create -n medical_env python=3.11 -y && conda activate medical_env
+pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 5.2. Dependency Installation
-Install the core backend dependencies:
+Open `http://127.0.0.1:8000`. The first start downloads the model (and the embedding model when RAG is on).
+A CUDA GPU is recommended; 16 GB of RAM is the minimum on CPU. Rebuild the dataset, index or model:
+
 ```bash
-pip install fastapi uvicorn pydantic
+python -m src.dataset_preprocessing     # data/qwen_ready_medical_qa.jsonl
+python -m src.build_vector_db           # rag_index/
+python -m src.finetune                  # outputs/qwen-medical (GPU)
 ```
 
-To install the inference engine with GPU acceleration:
-```bash
-pip install llama-cpp-python --extra-index-url [https://abetlen.github.io/llama-cpp-python/whl/cu124](https://abetlen.github.io/llama-cpp-python/whl/cu124)
-```
-If deploying on a CPU-only environment:
-```bash
-pip install llama-cpp-python --extra-index-url [https://abetlen.github.io/llama-cpp-python/whl/cpu](https://abetlen.github.io/llama-cpp-python/whl/cpu)
-```
+### API
 
-## 6. Directory Structure
-Ensure your project directory adheres to the following structure:
-```text
-/model
-    hagora-30/qwen2.5-1.5B-medical-arabic.
-/BackEnd
-    app.py
-/FrontEnd
-    index.html
-    (static assets)
-```
+`POST /api/chat`
 
-## 7. Execution Guide
-Navigate to the Backend directory and launch the FastAPI server using Uvicorn.
-```bash
-cd BackEnd
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
-```
-The backend API will be available at http://localhost:8000.
-
-## 8. API Documentation
-The backend exposes a RESTful API designed to communicate with the frontend client.
-
-* **Endpoint:** `POST /api/chat`
-* **Description:** Receives user queries and returns generated medical information.
-
-**Payload structure:**
 ```json
-{
-    "message": "String (User query)",
-    "max_tokens": "Integer (Default: 512)",
-    "temperature": "Float (Default: 0.2)"
-}
+{ "message": "ما هي أعراض مرض السكري؟", "max_tokens": 512, "temperature": 0.3 }
 ```
 
-**Response structure:**
-```json
-{
-    "response": "String (Generated model output)",
-    "elapsed_seconds": "Float",
-    "device": "String (Hardware execution context)"
-}
-```
+Response: `response`, `elapsed_seconds`, `device`, `rag`, `disclaimer`. `GET /api/health` reports the model and RAG mode.
 
-## 9. Important Disclaimer
-The output generated by this artificial intelligence model is for informational and educational purposes only. It does not constitute professional medical advice, diagnosis, or treatment. Users must always seek the advice of a qualified physician regarding medical conditions. The developers assume no liability for actions taken based on the model's outputs.
+## Engineering notes
+
+- **One backend:** a single FastAPI app with RAG on or off (`USE_RAG`), one frontend and one FAISS index.
+- **Safety prompt:** RAG and non-RAG modes share the system prompt used in fine-tuning (consult a doctor in critical cases,
+  no specific doses), and every response carries a disclaimer field.
+- **Evaluation:** the 5% held-out split is evaluated every epoch during fine-tuning.
+- **Portable setup:** project-relative paths, optional `flash-attn` (falls back to PyTorch SDPA), local-only CORS.
+
+## Scope
+
+The 1.5B model with retrieval is the recommended configuration; the 0.5B run (`reports/test_output_q0.5B.txt`) is kept as a
+smaller baseline. Answers are general health information and should be verified with a physician.
+
+## Disclaimer
+
+The output of this model is for informational and educational purposes only. It is not medical advice, diagnosis or
+treatment. Always consult a qualified physician about medical conditions. The developers accept no liability for actions
+taken based on the model's output.

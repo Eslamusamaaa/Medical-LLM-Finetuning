@@ -1,3 +1,4 @@
+from pathlib import Path
 import json
 import re
 from datasets import load_dataset
@@ -104,4 +105,5 @@ if __name__ == "__main__":
     
     
     final_data = preprocessor.process_dataset("madilcy/arabic-medical-qa-MERGED-MAQA-MMMLU-MI")
-    preprocessor.save_to_jsonl(final_data, "qwen_ready_medical_qa(2).jsonl")
+    out_path = Path(__file__).resolve().parent.parent / "data" / "qwen_ready_medical_qa.jsonl"
+    preprocessor.save_to_jsonl(final_data, out_path)

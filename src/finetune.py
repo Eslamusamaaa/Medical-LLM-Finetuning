@@ -1,8 +1,10 @@
 
-import os
+import importlib.util
 import json
-import torch
 import os
+from pathlib import Path
+
+import torch
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 from datasets import Dataset
 from transformers import (
@@ -18,9 +20,13 @@ from peft import (
 )
 from trl import SFTTrainer, SFTConfig
 
+# flash-attn is optional: fall back to PyTorch SDPA attention when it is not installed
+ATTN_IMPLEMENTATION = "flash_attention_2" if importlib.util.find_spec("flash_attn") else "sdpa"
+
 MODEL_ID    = "Qwen/Qwen2.5-1.5B-Instruct"
-DATA_PATH   = "qwen_ready_medical_qa(2).jsonl"
-OUTPUT_DIR  = "outputs/qwen-medical"
+ROOT        = Path(__file__).resolve().parent.parent
+DATA_PATH   = str(ROOT / "data" / "qwen_ready_medical_qa.jsonl")
+OUTPUT_DIR  = str(ROOT / "outputs" / "qwen-medical")
 
 SYSTEM_PROMPT = (
     "أنت مساعد طبي ذكي وموثوق. تقدم معلومات وإرشادات طبية عامة باللغة العربية السليمة، "
@@ -92,7 +98,7 @@ model = AutoModelForCausalLM.from_pretrained(
     torch_dtype=torch.bfloat16,        # Full BF16 precision
     device_map="auto",                 # Lightning AI: auto-maps to available GPU(s)
     trust_remote_code=True,
-    attn_implementation="flash_attention_2",  # ~30% faster on L40S
+    attn_implementation=ATTN_IMPLEMENTATION,
 )
 
 
@@ -152,8 +158,9 @@ sft_config = SFTConfig(
     save_strategy        = "epoch",
     save_total_limit     = 5,       # Keep all 5 epoch checkpoints
 
-    eval_strategy           = "no",    # ← وقف الـ evaluation خالص
-    load_best_model_at_end  = False,   # ← لازم تتغير معاها  # Keeps the best checkpoint at the end
+    eval_strategy           = "epoch",  # the 5% held-out split is now evaluated every epoch (it was built but never used)
+    per_device_eval_batch_size = 2,
+    load_best_model_at_end  = False,   # every epoch checkpoint is kept (save_total_limit=5)
 
     logging_dir          = f"{OUTPUT_DIR}/logs",
     logging_steps        = 10,
